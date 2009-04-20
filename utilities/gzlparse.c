@@ -108,7 +108,8 @@ void print_newline(struct gzlparse_state *user_state, bool suppress_comma)
 
 void print_indent(struct gzlparse_state *user_state)
 {
-    for(int i = 0; i < user_state->first_child_len; i++)
+    int i;
+    for(i = 0; i < user_state->first_child_len; i++)
         fputs("  ", stdout);
 }
 
@@ -184,7 +185,7 @@ void error_char_callback(struct gzl_parse_state *parse_state, int ch)
 void error_terminal_callback(struct gzl_parse_state *parse_state, struct gzl_terminal *terminal)
 {
     struct gzl_buffer *buffer = (struct gzl_buffer*)parse_state->user_data;
-    struct gzlparse_state *user_state = (struct gzlparse_state*)buffer->user_data;
+
     fprintf(stderr, "gzlparse: unexpected terminal '%s' at line %zu, column %zu "
                     "(byte offset %zu), aborting.\n",
                     terminal->name, terminal->offset.line, terminal->offset.column,

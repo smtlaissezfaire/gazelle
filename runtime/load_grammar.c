@@ -44,26 +44,6 @@
 #define BC_GLA_TRANSITION 2
 
 static
-void check_error(struct bc_read_stream *s)
-{
-    if(bc_rs_get_error(s))
-    {
-        int err = bc_rs_get_error(s);
-        printf("There were stream errors!\n");
-        if(err & BITCODE_ERR_VALUE_TOO_LARGE)
-            printf("  Value too large.\n");
-        if(err & BITCODE_ERR_NO_SUCH_VALUE)
-            printf("  No such value.\n");
-        if(err & BITCODE_ERR_IO)
-            printf("  IO error.\n");
-        if(err & BITCODE_ERR_CORRUPT_INPUT)
-            printf("  Corrupt input.\n");
-        if(err & BITCODE_ERR_INTERNAL)
-            printf("  Internal error.\n");
-    }
-}
-
-static
 void unexpected(struct bc_read_stream *s, struct record_info ri)
 {
     printf("Unexpected.  Record is: ");
@@ -541,11 +521,12 @@ struct gzl_grammar *gzl_load_grammar(struct bc_read_stream *s)
 
 void gzl_free_grammar(struct gzl_grammar *g)
 {
-    for(int i = 0; g->strings[i] != NULL; i++)
+    int i;
+    for(i = 0; g->strings[i] != NULL; i++)
         free(g->strings[i]);
     free(g->strings); 
 
-    for(int i = 0; i < g->num_rtns; i++)
+    for(i = 0; i < g->num_rtns; i++)
     {
         struct gzl_rtn *rtn = &g->rtns[i];
         free(rtn->states);
@@ -553,7 +534,7 @@ void gzl_free_grammar(struct gzl_grammar *g)
     }
     free(g->rtns);
 
-    for(int i = 0; i < g->num_glas; i++)
+    for(i = 0; i < g->num_glas; i++)
     {
         struct gzl_gla *gla = &g->glas[i];
         free(gla->states);
@@ -561,7 +542,7 @@ void gzl_free_grammar(struct gzl_grammar *g)
     }
     free(g->glas);
 
-    for(int i = 0; i < g->num_intfas; i++)
+    for(i = 0; i < g->num_intfas; i++)
     {
         struct gzl_intfa *intfa = &g->intfas[i];
         free(intfa->states);

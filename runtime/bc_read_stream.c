@@ -276,10 +276,12 @@ void bc_rs_close_stream(struct bc_read_stream *stream)
     free(stream->record_buf);
     free(stream->abbrev_operands);
     free(stream->stream_stack);
+    
+    int i, j;
 
-    for(int i = 0; i < stream->blockinfo_len; i++)
+    for(i = 0; i < stream->blockinfo_len; i++)
     {
-        for(int j = 0; j < stream->blockinfos[i].num_abbreviations; j++)
+        for(j = 0; j < stream->blockinfos[i].num_abbreviations; j++)
         {
             free(stream->blockinfos[i].abbreviations[j].operands);
         }
@@ -495,8 +497,9 @@ static void read_user_abbreviated_record(struct bc_read_stream *stream,
                                          int num_operands)
 {
     stream->current_record_size = 0;
+    int i, j;
 
-    for(int i = 0; i < num_operands; i++)
+    for(i = 0; i < num_operands; i++)
     {
         struct abbrev_operand *op = &ops[i];
 
@@ -504,7 +507,7 @@ static void read_user_abbreviated_record(struct bc_read_stream *stream,
         {
             int num_elements = read_vbr(stream, 6);
             i += 1;
-            for(int j = 0; j < num_elements; j++)
+            for(j = 0; j < num_elements; j++)
                 append_value(stream, read_abbrev_value(stream, &ops[i]));
         }
         else
@@ -561,7 +564,8 @@ void align_32_bits(struct bc_read_stream *stream)
 
 struct blockinfo *find_blockinfo(struct bc_read_stream *stream, int block_id)
 {
-    for(int i = 0; i < stream->blockinfo_len; i++)
+    int i;
+    for(i = 0; i < stream->blockinfo_len; i++)
         if(stream->blockinfos[i].block_id == block_id)
             return &stream->blockinfos[i];
 
@@ -621,6 +625,7 @@ void bc_rs_next_record(struct bc_read_stream *stream)
 
     int abbrev_id = read_fixed(stream, stream->abbrev_len);
     stream->current_record_offset = 0;
+    int i;
 
     switch(abbrev_id) {
         case ABBREV_ID_END_BLOCK:
@@ -661,7 +666,7 @@ void bc_rs_next_record(struct bc_read_stream *stream)
             RESIZE_ARRAY_IF_NECESSARY(stream->record_abbrev_operands, stream->record_size_abbrev,
                                       stream->record_num_abbrev);
 
-            for(int i = 0; i < stream->record_num_abbrev; i++)
+            for(i = 0; i < stream->record_num_abbrev; i++)
             {
                 read_abbrev_op(stream, &stream->record_abbrev_operands[i], 0);
             }
@@ -677,7 +682,7 @@ void bc_rs_next_record(struct bc_read_stream *stream)
             RESIZE_ARRAY_IF_NECESSARY(stream->record_buf, stream->record_buf_size,
                                       stream->current_record_size+1);
 
-            for(int i = 0; i < stream->current_record_size; i++)
+            for(i = 0; i < stream->current_record_size; i++)
                 stream->record_buf[i] = read_vbr(stream, 6);
             break;
 
@@ -712,6 +717,8 @@ void bc_rs_next_record(struct bc_read_stream *stream)
 
 struct record_info bc_rs_next_data_record(struct bc_read_stream *stream)
 {
+    int i;
+  
     while(1)
     {
         bc_rs_next_record(stream);
@@ -732,7 +739,7 @@ struct record_info bc_rs_next_data_record(struct bc_read_stream *stream)
             struct abbrev_operand *abbrev_operands = &stream->abbrev_operands[stream->abbrev_operands_len];
             stream->abbrev_operands_len += num_ops;
 
-            for(int i = 0; i < num_ops; i++)
+            for(i = 0; i < num_ops; i++)
                 abbrev_operands[i] = stream->record_abbrev_operands[i];
 
             stream->num_abbrevs++;
@@ -783,7 +790,7 @@ struct record_info bc_rs_next_data_record(struct bc_read_stream *stream)
                     struct blockinfo_abbrev *abbrev = &bi->abbreviations[bi->num_abbreviations++];
                     abbrev->num_operands = stream->record_num_abbrev;
                     abbrev->operands = malloc(sizeof(*abbrev->operands) * abbrev->num_operands);
-                    for(int i = 0; i < abbrev->num_operands; i++)
+                    for(i = 0; i < abbrev->num_operands; i++)
                         abbrev->operands[i] = stream->record_abbrev_operands[i];
                 }
 

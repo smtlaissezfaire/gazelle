@@ -26,39 +26,6 @@
 #include "gazelle/parse.h"
 
 /*
- * A diagnostic function for dumping the current state of the stack.
- */
-static
-void dump_stack(struct gzl_parse_state *s, FILE *output)
-{
-    fprintf(output, "Stack dump:");
-    struct gzl_grammar *g = s->bound_grammar->grammar;
-    for(int i = 0; i < s->parse_stack_len; i++) {
-        struct gzl_parse_stack_frame *frame = &s->parse_stack[i];
-        switch(frame->frame_type) {
-            case GZL_FRAME_TYPE_RTN: {
-                struct gzl_rtn_frame *rtn_frame = &frame->f.rtn_frame;
-                fprintf(output, "RTN: %s, ", rtn_frame->rtn->name);
-                break;
-            }
-
-            case GZL_FRAME_TYPE_GLA: {
-                struct gzl_gla_frame *gla_frame = &frame->f.gla_frame;
-                fprintf(output, "GLA: #%d, ", gla_frame->gla - g->glas);
-                break;
-            }
-
-            case GZL_FRAME_TYPE_INTFA: {
-                struct gzl_intfa_frame *intfa_frame = &frame->f.intfa_frame;
-                fprintf(output, "IntFA: #%d, ", intfa_frame->intfa - g->intfas);
-                break;
-            }
-        }
-    }
-    fprintf(output, "\n");
-}
-
-/*
  * The following are stack-manipulation functions.  Gazelle maintains a runtime
  * stack (which is completely separate from the C stack), and these functions
  * provide pushing and popping of different kinds of stack frames.
@@ -267,7 +234,8 @@ static
 struct gzl_rtn_transition *find_rtn_terminal_transition(
     struct gzl_rtn_state *rtn_state, struct gzl_terminal *terminal)
 {
-    for(int i = 0; i < rtn_state->num_transitions; i++) {
+    int i;
+    for(i = 0; i < rtn_state->num_transitions; i++) {
         struct gzl_rtn_transition *t = &rtn_state->transitions[i];
         if(t->transition_type == GZL_TERMINAL_TRANSITION &&
            t->edge.terminal_name == terminal->name)
@@ -280,7 +248,8 @@ static
 struct gzl_gla_transition *find_gla_transition(struct gzl_gla_state *gla_state,
                                                char *term_name)
 {
-    for(int i = 0; i < gla_state->d.nonfinal.num_transitions; i++) {
+    int i;
+    for(i = 0; i < gla_state->d.nonfinal.num_transitions; i++) {
         struct gzl_gla_transition *t = &gla_state->d.nonfinal.transitions[i];
         if(t->term == term_name)
             return t;
@@ -292,7 +261,8 @@ static
 struct gzl_intfa_transition *find_intfa_transition(
     struct gzl_intfa_state *intfa_state, char ch)
 {
-    for(int i = 0; i < intfa_state->num_transitions; i++) {
+    int i;
+    for(i = 0; i < intfa_state->num_transitions; i++) {
         struct gzl_intfa_transition *t = &intfa_state->transitions[i];
         if(ch >= t->ch_low && ch <= t->ch_high)
             return t;
@@ -569,6 +539,7 @@ enum gzl_status do_intfa_transition(struct gzl_parse_state *s,
 enum gzl_status gzl_parse(struct gzl_parse_state *s, char *buf, size_t buf_len)
 {
     enum gzl_status status = GZL_STATUS_OK;
+    int i;
 
     /* For the first call, we need to push the initial frame and
      * descend from the starting frame until we hit an IntFA frame. */
@@ -583,13 +554,14 @@ enum gzl_status gzl_parse(struct gzl_parse_state *s, char *buf, size_t buf_len)
         return GZL_STATUS_HARD_EOF;
     }
 
-    for(int i = 0; i < buf_len && status == GZL_STATUS_OK; i++)
+    for(i = 0; i < buf_len && status == GZL_STATUS_OK; i++)
         status = do_intfa_transition(s, buf[i]);
     return status;
 }
 
 bool gzl_finish_parse(struct gzl_parse_state *s)
 {
+    int i;
     /* First deal with an open IntFA frame if there is one.  The frame must
      * be in a start state (in which case we back it out), a final state
      * (in which case we recognize and process the terminal), or both (in
@@ -649,7 +621,7 @@ bool gzl_finish_parse(struct gzl_parse_state *s)
      * that each frame's dest_state is a final state (or the actual current
      * state in the bottommost frame). */
     if(s->parse_stack_len > 0) { /* will be 0 if we already hit hard EOF. */
-        for(int i = 0; i < s->parse_stack_len - 1; i++) {
+        for(i = 0; i < s->parse_stack_len - 1; i++) {
             frame = &s->parse_stack[i];
             assert(frame->frame_type == GZL_FRAME_TYPE_RTN);
             struct gzl_rtn_frame *rtn_frame = &frame->f.rtn_frame;
@@ -689,15 +661,16 @@ struct gzl_parse_state *gzl_dup_parse_state(struct gzl_parse_state *orig)
     struct gzl_parse_state *copy = malloc(sizeof(*copy));
     /* This erroneously copies pointers to dynarrays, but we'll fix in a sec. */
     *copy = *orig;
+    int i;
 
     INIT_DYNARRAY(copy->parse_stack, 0, 16);
     RESIZE_DYNARRAY(copy->parse_stack, orig->parse_stack_len);
-    for(int i = 0; i < orig->parse_stack_len; i++)
+    for(i = 0; i < orig->parse_stack_len; i++)
         copy->parse_stack[i] = orig->parse_stack[i];
 
     INIT_DYNARRAY(copy->token_buffer, 0, 2);
     RESIZE_DYNARRAY(copy->token_buffer, orig->token_buffer_len);
-    for(int i = 0; i < orig->token_buffer_len; i++)
+    for(i = 0; i < orig->token_buffer_len; i++)
         copy->token_buffer[i] = orig->token_buffer[i];
 
     return copy;

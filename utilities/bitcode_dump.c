@@ -46,6 +46,7 @@ void usage()
 int main(int argc, char *argv[0])
 {
     int nesting = 0;
+    int i;
 
     if(argc < 2 || strcmp(argv[1], "--help") == 0)
     {
@@ -65,17 +66,18 @@ int main(int argc, char *argv[0])
         struct record_info ri = bc_rs_next_data_record(s);
         if(ri.record_type == DataRecord)
         {
-            for(int i = 0; i < nesting; i++)
+            for(i = 0; i < nesting; i++)
                 printf("  ");
 
             printf("%u: ", ri.id);
-            for(int i = 0; i < bc_rs_get_record_size(s); i++)
+            
+            for(i = 0; i < bc_rs_get_record_size(s); i++)
                 printf("%llu ", bc_rs_read_64(s, i));
             printf("\n");
         }
         else if(ri.record_type == StartBlock)
         {
-            for(int i = 0; i < nesting; i++)
+            for(i = 0; i < nesting; i++)
                 printf("  ");
             printf("-- (id=%u)\n", ri.id);
             nesting++;
