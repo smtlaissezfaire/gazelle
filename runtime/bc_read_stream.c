@@ -562,7 +562,7 @@ void align_32_bits(struct bc_read_stream *stream)
         refill_next_bits(stream);
 }
 
-struct blockinfo *find_blockinfo(struct bc_read_stream *stream, int block_id)
+struct blockinfo *find_blockinfo(struct bc_read_stream *stream, uint32_t block_id)
 {
     int i;
     for(i = 0; i < stream->blockinfo_len; i++)

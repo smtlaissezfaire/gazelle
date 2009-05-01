@@ -3,13 +3,14 @@
 
 #define DEFINE_DYNARRAY(name, type) \
   type *name; \
-  int name ## _len; \
-  int name ## _size;
+  size_t name ## _len; \
+  size_t name ## _size;
 
 #define RESIZE_DYNARRAY(name, desired_len) { \
-  int orig_size = name ## _size; \
-  while(name ## _size < (desired_len)) \
+  size_t orig_size = name ## _size;          \
+  while((signed) name ## _size < ((signed) desired_len)) { \
     name ## _size *= 2; \
+  } \
   /* don't bother shrinking for now.  when/if we do, we'll want to bake in \
    * some kind of hysteresis so that we don't shrink until we've been under \
    * for a while. */ \

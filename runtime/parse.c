@@ -286,7 +286,7 @@ struct gzl_intfa_transition *find_intfa_transition(
 static
 enum gzl_status do_gla_transition(struct gzl_parse_state *s,
                                         struct gzl_terminal *term,
-                                        int *rtn_term_offset)
+                                        size_t *rtn_term_offset)
 {
     struct gzl_parse_stack_frame *frame = DYNARRAY_GET_TOP(s->parse_stack);
     assert(frame->frame_type == GZL_FRAME_TYPE_GLA);
@@ -353,8 +353,8 @@ enum gzl_status process_terminal(struct gzl_parse_state *s, char *term_name,
 {
     pop_intfa_frame(s);
     struct gzl_parse_stack_frame *frame = DYNARRAY_GET_TOP(s->parse_stack);
-    int rtn_term_offset = 0;
-    int gla_term_offset = s->token_buffer_len;
+    size_t rtn_term_offset = 0;
+    size_t gla_term_offset = s->token_buffer_len;
 
     RESIZE_DYNARRAY(s->token_buffer, s->token_buffer_len+1);
     if(s->token_buffer_len >= s->max_lookahead)
@@ -432,7 +432,7 @@ enum gzl_status process_terminal(struct gzl_parse_state *s, char *term_name,
      * later.
      *
      * We now remove the consumed terminals from token_buffer. */
-    int remaining_terminals = s->token_buffer_len - rtn_term_offset;
+    size_t remaining_terminals = s->token_buffer_len - rtn_term_offset;
     if(remaining_terminals > 0)
         memmove(s->token_buffer, s->token_buffer + rtn_term_offset,
                 remaining_terminals * sizeof(*s->token_buffer));
@@ -539,7 +539,7 @@ enum gzl_status do_intfa_transition(struct gzl_parse_state *s,
 enum gzl_status gzl_parse(struct gzl_parse_state *s, char *buf, size_t buf_len)
 {
     enum gzl_status status = GZL_STATUS_OK;
-    int i;
+    size_t i;
 
     /* For the first call, we need to push the initial frame and
      * descend from the starting frame until we hit an IntFA frame. */
@@ -561,7 +561,7 @@ enum gzl_status gzl_parse(struct gzl_parse_state *s, char *buf, size_t buf_len)
 
 bool gzl_finish_parse(struct gzl_parse_state *s)
 {
-    int i;
+    size_t i;
     /* First deal with an open IntFA frame if there is one.  The frame must
      * be in a start state (in which case we back it out), a final state
      * (in which case we recognize and process the terminal), or both (in
@@ -661,7 +661,7 @@ struct gzl_parse_state *gzl_dup_parse_state(struct gzl_parse_state *orig)
     struct gzl_parse_state *copy = malloc(sizeof(*copy));
     /* This erroneously copies pointers to dynarrays, but we'll fix in a sec. */
     *copy = *orig;
-    int i;
+    size_t i;
 
     INIT_DYNARRAY(copy->parse_stack, 0, 16);
     RESIZE_DYNARRAY(copy->parse_stack, orig->parse_stack_len);
@@ -708,7 +708,7 @@ void gzl_init_parse_state(struct gzl_parse_state *s,
 
 enum gzl_status gzl_parse_file(struct gzl_parse_state *state,
                                FILE *file, void *user_data,
-                               int max_buffer_size)
+                               size_t max_buffer_size)
 {
     struct gzl_buffer *buffer = malloc(sizeof(*buffer));
     INIT_DYNARRAY(buffer->buf, 0, 4096);
@@ -721,7 +721,7 @@ enum gzl_status gzl_parse_file(struct gzl_parse_state *state,
      * each time.  This number shrinks as the amount of data we're preserving
      * from open tokens grows.  If the number is below this number we increase
      * our buffer size. */
-    const int min_new_data = 4000;
+    const size_t min_new_data = 4000;
 
     enum gzl_status status;
     bool is_eof = false;
@@ -779,7 +779,7 @@ enum gzl_status gzl_parse_file(struct gzl_parse_state *state,
                                   buffer->buf_offset;
         size_t bytes_to_save = buffer->buf_size - bytes_to_discard;
         char *buf_to_save_from = buffer->buf + bytes_to_discard;
-        assert(bytes_to_discard <= buffer->buf_len);  /* hasn't overflowed. */
+        assert(bytes_to_discard <= (size_t) buffer->buf_len);  /* hasn't overflowed. */
 
         memmove(buffer->buf, buf_to_save_from, bytes_to_save);
         buffer->buf_offset += bytes_to_discard;

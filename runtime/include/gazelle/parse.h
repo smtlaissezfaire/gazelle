@@ -170,12 +170,12 @@ struct gzl_parse_state
 
     /* Gazelle will return an error if the stack attempts to exceed this
      * depth. */
-    int max_stack_depth;
+    size_t max_stack_depth;
 
     /* Gazelle will return an error if the input requires more than this
      * many terminals of lookahead.  This is only an issue for LL(*)
      * languages -- for LL(k), this is naturally bounded to k. */
-    int max_lookahead;
+    size_t max_lookahead;
 
     /* The parse stack is the main piece of state that the parser keeps.
      * There is a stack frame for every RTN, GLA, and IntFA state we are
@@ -248,18 +248,18 @@ struct gzl_buffer
     DEFINE_DYNARRAY(buf, char);
 
     /* The file offset of the first byte currently in the buffer. */
-    int buf_offset;
+    size_t buf_offset;
 
     /* The number of bytes that have been successfully parsed. */
-    int bytes_parsed;
-
+    size_t bytes_parsed;
+    
     /* The user_data you passed to parse_file. */
     void *user_data;
 };
 
 enum gzl_status gzl_parse_file(struct gzl_parse_state *state,
                                FILE *file, void *user_data,
-                               int max_buffer_size);
+                               size_t max_buffer_size);
 
 #ifdef __cplusplus
 }  /* extern "C" */
