@@ -1,5 +1,6 @@
 
 OBJS=bc_read_stream.o parse.o load_grammar.o
+CFLAGS=-W -Wall
 
 default: libgazelle.a
 
