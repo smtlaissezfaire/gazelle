@@ -18,11 +18,11 @@ module Gazelle
       end
 
       it "should be true if it can parse the input" do
-        @parser.parse("(5)").should be_true
+        @parser.parse?("(5)").should be_true
       end
 
       it "should be false if it cannot parse the input" do
-        @parser.parse("(()").should be_false
+        @parser.parse?("(()").should be_false
       end
     end
   end

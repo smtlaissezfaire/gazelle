@@ -21,7 +21,7 @@ void error_terminal_callback() {
   terminal_error = 1;
 }
 
-VALUE rb_gazelle_parse(VALUE self, VALUE input) {
+VALUE rb_gazelle_parse_p(VALUE self, VALUE input) {
   VALUE compiled_file_stream = rb_iv_get(self, "@filename");
   char *filename     = RSTRING(compiled_file_stream)->ptr;
   char *input_string = RSTRING(input)->ptr;
@@ -60,7 +60,7 @@ void Init_gazelle() {
   VALUE Gazelle         = rb_const_get(rb_cObject, rb_intern("Gazelle"));
   VALUE Gazelle_Parser  = rb_const_get_at(Gazelle, rb_intern("Parser"));
 
-  rb_define_method(Gazelle_Parser, "parse", rb_gazelle_parse, 1);
+  rb_define_method(Gazelle_Parser, "parse?", rb_gazelle_parse_p, 1);
 }
 
 #endif /* GAZELLE_RUBY_PARSE */
