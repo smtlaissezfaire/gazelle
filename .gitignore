@@ -3,6 +3,7 @@
 *.so
 *.a
 *.gzc
+*.bundle
 gzlc
 lua_path
 luac.out
