@@ -28,12 +28,9 @@ VALUE rb_gazelle_parse_p(VALUE self, VALUE input) {
   
   struct bc_read_stream *s = bc_rs_open_file(filename);
 
-  // TODO: Spec ME
-  // if (!s) {
-  //   printf("Couldn't open bitcode file '%s'!\n\n", filename);
-  //   return Qfalse;
-  // }
-  // 
+  if (!s)
+    return Qfalse; // should raise an invalid file format error in ruby instead
+  
   struct gzl_grammar *g = gzl_load_grammar(s);
   bc_rs_close_stream(s);
   

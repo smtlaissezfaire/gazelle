@@ -2,7 +2,16 @@
 module Gazelle
   class Parser
     def initialize(filename)
-      @filename = File.expand_path(filename)
+      file = expand_path(filename)
+      raise(Errno::ENOENT) unless File.exists?(file)
+      
+      @filename = file
+    end
+
+  private
+
+    def expand_path(filename)
+      File.expand_path(filename)
     end
   end
 end
